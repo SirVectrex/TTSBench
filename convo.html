@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rate TTS - Conversational</title>
+  <link rel="stylesheet" href="/public/style.css">  <!-- Ensure you have the same styles -->
+</head>
+<body>
+  <!-- Global Header -->
+  <header>
+    <div class="header-content">
+      <h1 id="home"><a href="index.html">TTS Bench</a></h1>
+      <nav>
+        <ul>
+          <li><a href="rate.html">Rate Monologue TTS</a></li>
+          <li><a href="convo.html">Rate Conversational TTS</a></li>
+          <li><a href="leaderboard_standard.html">Leaderboard Monologue</a></li>
+          <li><a href="leaderboard_convo.html">Leaderboard Conversational</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-container">
+    <div class="content">
+      <p>Listen to the randomly selected conversational audio and tell us if it's human or robotic!</p>
+
+      <!-- Loading Spinner -->
+      <div id="loadingSpinner" class="spinner-container">
+        <div class="spinner"></div>
+        <p>Loading audio...</p>
+      </div>
+
+      <!-- Audio Player -->
+      <audio id="audio" controls style="display: none;">
+        <source id="audioSource" type="audio/wav">
+        Your browser does not support the audio element.
+      </audio>
+  
+      <!-- Human/Robot Classification -->
+      <div id="classificationButtons" class="classification-buttons">
+        <button id="humanButton" class="classification-button">Human</button>
+        <button id="robotButton" class="classification-button">Robot</button>
+      </div>
+
+      <!-- Rating Section -->
+      <p>How would you rate the listening experience?</p>
+      <div id="ratingButtons" class="rating-buttons">
+        <button class="ratingButton" data-rating="1">1 - Terrible</button>
+        <button class="ratingButton" data-rating="2">2 - Poor</button>
+        <button class="ratingButton" data-rating="3">3 - Average</button>
+        <button class="ratingButton" data-rating="4">4 - Good</button>
+        <button class="ratingButton" data-rating="5">5 - Excellent</button>
+      </div>
+
+      <!-- Submit Rating -->
+      <button id="submitRating" class="submit-button">Submit Rating</button>
+    </div>
+  </main>
+
+  <script>
+    let currentFile = '';
+
+    // Fetch conversational audio file and set it to the audio element
+    function loadAudio() {
+      fetch('/api/get-audio?type=conversational')
+        .then(res => res.json())
+        .then(data => {
+          const audioPath = `/audio/${data.filename}`;
+          const audioElement = document.getElementById('audioSource');
+          audioElement.src = audioPath;
+
+          // Reload the audio player after setting the source
+          const audio = document.getElementById('audio');
+          audio.load();
+
+          // Handle audio loading event
+          audio.addEventListener('canplaythrough', () => {
+            // Once audio is ready to play, hide the loading spinner and show the audio player
+            document.getElementById('loadingSpinner').style.display = 'none';
+            audio.style.display = 'block';
+          });
+
+          // Handle any errors with audio loading
+          audio.addEventListener('error', () => {
+            document.getElementById('loadingSpinner').style.display = 'none';
+            alert('Error loading audio. Please try again later.');
+          });
+
+          currentFile = data.filename.split('/').pop();  // For tracking/rating
+        })
+        .catch(error => {
+          console.error('Error fetching audio:', error);
+          document.getElementById('loadingSpinner').style.display = 'none';
+          alert('Error fetching audio. Please try again later.');
+        });
+    }
+
+    // Button functionality to classify as Human/Robot
+    let classification = '';
+    document.getElementById('humanButton').addEventListener('click', () => {
+      classification = 'human';
+      toggleButtonState('humanButton');
+    });
+
+    document.getElementById('robotButton').addEventListener('click', () => {
+      classification = 'robot';
+      toggleButtonState('robotButton');
+    });
+
+    function toggleButtonState(selectedButton) {
+      const buttons = document.querySelectorAll('.classification-button');
+      buttons.forEach(button => button.classList.remove('active'));  // Remove active state from all buttons
+      document.getElementById(selectedButton).classList.add('active');  // Add active state to the selected button
+    }
+
+    // Custom Rating Button Click Event
+    let selectedRating = null;
+
+    // Add event listener for rating buttons
+    const ratingButtons = document.querySelectorAll('.ratingButton');
+    ratingButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Remove active class from all buttons
+        ratingButtons.forEach(btn => btn.classList.remove('active'));
+        
+        // Add active class to the clicked button
+        button.classList.add('active');
+        
+        // Store the selected rating
+        selectedRating = button.getAttribute('data-rating');
+      });
+    });
+
+    // Handle rating submission
+    document.getElementById('submitRating').addEventListener('click', () => {
+      const rating = selectedRating;
+
+      if (!classification || !rating) {
+        alert('Please classify the audio and provide a rating before submitting!');
+        return;
+      }
+
+      // Send the rating data to the backend
+      fetch('/api/submit-rating', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          file: currentFile,
+          rating: rating,
+          isHuman: classification,
+          type: 'conversational'
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert('Thank you for your feedback!');
+        // Reload the page to get the next audio for rating
+        window.location.reload();
+      })
+      .catch(error => console.error('Error submitting rating:', error));
+    });
+
+    // Initially load the first conversational audio
+    loadAudio();
+  </script>
+</body>
+</html>
