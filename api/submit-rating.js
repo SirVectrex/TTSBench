@@ -1,49 +1,48 @@
-const fs = require('fs');
-const path = require('path');
+const { sql } = require('@vercel/postgres');
 
 module.exports = async (req, res) => {
-  if (req.method === 'POST') {
-    const { file, rating, isHuman, type } = req.body;
 
-    if (!file || !rating || !isHuman || !type) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-
-    // Prepare the data to save
-    const ratingData = {
-      file,
-      rating,
-      isHuman,
-      type,
-      timestamp: new Date().toISOString(),
-    };
-
-    // Path to the JSON file where ratings will be saved
-    const ratingsFilePath = path.join(__dirname, '../data/ratings.json');
-
-    // Read existing ratings (if any)
-    let existingRatings = [];
-    try {
-      const data = fs.readFileSync(ratingsFilePath, 'utf8');
-      existingRatings = JSON.parse(data);
-    } catch (err) {
-      console.error('Error reading ratings file:', err);
-    }
-
-    // Add the new rating to the existing ones
-    existingRatings.push(ratingData);
-
-    // Save updated ratings back to the file
-    try {
-      fs.writeFileSync(ratingsFilePath, JSON.stringify(existingRatings, null, 2));
-      console.log('Rating saved:', ratingData);
-      return res.status(200).json({ message: 'Rating submitted successfully' });
-    } catch (err) {
-      console.error('Error saving ratings file:', err);
-      return res.status(500).json({ error: 'Failed to save rating' });
-    }
-  } else {
-    // If the request method is not POST
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
+  const { file, rating, isHuman, type } = req.body;
+
+  // Ensure all required fields are present (even if they are empty strings or null/undefined)
+  if (file === undefined || file === null || file === '' ||
+      rating === undefined || rating === null || // Rating might be 0, so don't check for emptiness
+      isHuman === undefined || isHuman === null ||
+      type === undefined || type === null || type === ''
+     )
+  {
+       return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+
+  const parsedRating = parseInt(rating, 10);
+
+  const parsedIsHuman = (isHuman !== 'robot'); // This will be true if isHuman is 'human', false if 'robot'
+
+   if (
+      typeof file !== 'string' ||
+      typeof type !== 'string' ||
+      isNaN(parsedRating) // Check if the parseInt conversion resulted in Not-a-Number
+     )
+  {
+       return res.status(400).json({ error: 'Invalid data types received' });
+  }
+
+
+  try {
+    await sql`
+      INSERT INTO ratings (file, rating, is_human, type)
+      VALUES (${file}, ${parsedRating}, ${parsedIsHuman}, ${type});
+    `;
+
+    return res.status(200).json({ message: 'Rating submitted successfully to Neon DB' });
+  } catch (error) {
+    // Handle any errors during the database operation (e.g., DB connection issues)
+    console.error('Error saving rating to Neon database:', error);
+    return res.status(500).json({ error: 'Failed to save rating to database', details: error.message });
   }
 };

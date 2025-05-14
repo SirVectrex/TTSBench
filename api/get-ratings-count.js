@@ -1,20 +1,24 @@
-const fs = require('fs');
-const path = require('path');
+
+const { sql } = require('@vercel/postgres');
 
 module.exports = async (req, res) => {
+
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method Not Allowed', message: 'This endpoint only supports GET requests.' });
+  }
+
   try {
-    // Read the ratings.json file
-    const ratingsPath = path.join(__dirname, '..', '/data/ratings.json');
-    const data = fs.readFileSync(ratingsPath, 'utf8');
-    const ratings = JSON.parse(data);
 
-    // Count the ratings
-    const ratingsCount = ratings.length;
+    const { rows } = await sql`SELECT COUNT(*) FROM ratings;`;
 
-    // Return the count
-    res.status(200).json({ count: ratingsCount });
+    const totalRatingsCount = parseInt(rows[0].count, 10);
+
+
+    return res.status(200).json({ count: totalRatingsCount });
+
   } catch (error) {
-    console.error('Error reading ratings file:', error);
-    res.status(500).json({ error: 'Error fetching ratings count' });
+    // Handle any errors during the database operation
+    console.error('Error fetching total ratings count from database:', error);
+    return res.status(500).json({ error: 'Failed to retrieve total ratings count', details: error.message });
   }
 };
