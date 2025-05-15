@@ -13,6 +13,7 @@
     "StyleTTS2.wav":{ "model": "StyleTTS2", "label": "robot","style": "standard" },
     "DIAPodcastIntroOld.wav":{ "model": "Dia 1.6B", "label": "robot","style": "conversational" },
     "DIA_brainybites.wav":{ "model": "Dia 1.6B", "label": "robot","style": "conversational" },
-    "CSM_brainybites.wav":{ "model": "Dia 1.6B", "label": "robot","style": "conversational" }
+    "CSM_brainybites.wav":{ "model": "Dia 1.6B", "label": "robot","style": "conversational" },
+    "girlvoice.wav":{ "model": "Human", "label": "human","style": "standard" }
   }
   
