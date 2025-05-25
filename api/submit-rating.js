@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
       VALUES (${file}, ${parsedRating}, ${parsedIsHuman}, ${type});
     `;
 
-    return res.status(200).json({ message: 'Rating submitted successfully to Neon DB' });
+    return res.status(200).json({ message: 'Rating submitted. Loading next...' });
   } catch (error) {
     // Handle any errors during the database operation (e.g., DB connection issues)
     console.error('Error saving rating to Neon database:', error);

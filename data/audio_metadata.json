@@ -14,6 +14,13 @@
     "DIAPodcastIntroOld.wav":{ "model": "Dia 1.6B", "label": "robot","style": "conversational" },
     "DIA_brainybites.wav":{ "model": "Dia 1.6B", "label": "robot","style": "conversational" },
     "CSM_brainybites.wav":{ "model": "Dia 1.6B", "label": "robot","style": "conversational" },
-    "girlvoice.wav":{ "model": "Human", "label": "human","style": "standard" }
+    "girlvoice.wav":{ "model": "Human", "label": "human","style": "standard" },
+    "coral-openai.wav":{ "model": "OpenAI", "label": "robot","style": "standard" },
+    "Echo_OPENAI.wav":{ "model": "OpenAI", "label": "robot","style": "standard" },
+    "Google_ORUS.wav":{ "model": "Google", "label": "robot","style": "standard" },
+    "ElevenLabs.wav":{ "model": "ElevenLabs Studio", "label": "robot","style": "conversational" },
+    "ElevenLabs_Conversation.wav":{ "model": "ElevenLabs Studio", "label": "robot","style": "conversational" },
+    "uktts.wav": { "model": "Human", "label": "human","style": "conversational" },
+    "papla_conversational.wav":{ "model": "Papla", "label": "robot","style": "conversational" }
   }
   
