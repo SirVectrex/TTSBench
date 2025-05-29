@@ -21,6 +21,7 @@
     "ElevenLabs.wav":{ "model": "ElevenLabs Studio", "label": "robot","style": "conversational" },
     "ElevenLabs_Conversation.wav":{ "model": "ElevenLabs Studio", "label": "robot","style": "conversational" },
     "uktts.wav": { "model": "Human", "label": "human","style": "conversational" },
-    "papla_conversational.wav":{ "model": "Papla", "label": "robot","style": "conversational" }
+    "papla_conversational.wav":{ "model": "Papla", "label": "robot","style": "conversational" },
+    "GoogleTTS.wav",:{ "model": "Google", "label": "robot","style": "conversational" }
   }
   
